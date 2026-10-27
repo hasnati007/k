@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>i-Inovasi PSMZA 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --primary: #1a56a0;
+    --primary-dark: #134080;
+    --secondary: #e8941a;
+    --success: #2e7d32;
+    --danger: #c62828;
+    --warning: #f57c00;
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --border: #d0d9e4;
+    --text: #1a2533;
+    --muted: #5a6a7e;
+    --accent: #e3ecf8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, var(--primary) 0%, #0d3b73 100%);
+    color: #fff; padding: 0 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .logo-badge {
+    background: var(--secondary); color: #fff;
+    font-weight: 800; font-size: 13px; padding: 6px 10px;
+    border-radius: 6px; letter-spacing: 1px;
+  }
+  .header-title h1 { font-size: 18px; font-weight: 700; }
+  .header-title p { font-size: 11px; opacity: 0.8; }
+  .header-right { font-size: 12px; opacity: 0.85; text-align: right; }
+
+  /* NAV TABS */
+  nav {
+    background: #fff; border-bottom: 2px solid var(--border);
+    display: flex; padding: 0 24px; gap: 0;
+  }
+  nav button {
+    background: none; border: none; padding: 14px 20px;
+    font-size: 13px; font-weight: 600; color: var(--muted);
+    cursor: pointer; border-bottom: 3px solid transparent;
+    margin-bottom: -2px; transition: all 0.2s;
+  }
+  nav button:hover { color: var(--primary); }
+  nav button.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+  /* LAYOUT */
+  main { padding: 24px; max-width: 1400px; margin: 0 auto; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* CARDS */
+  .card {
+    background: var(--card); border-radius: 10px;
+    border: 1px solid var(--border);
+    padding: 20px; margin-bottom: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .card-title {
+    font-size: 15px; font-weight: 700; color: var(--primary);
+    margin-bottom: 16px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  /* STAT CARDS */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 20px; }
+  .stat-card {
+    background: var(--card); border-radius: 10px;
+    padding: 18px 20px; border: 1px solid var(--border);
+    border-left: 5px solid var(--primary);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .stat-card.green { border-left-color: var(--success); }
+  .stat-card.orange { border-left-color: var(--secondary); }
+  .stat-card.red { border-left-color: var(--danger); }
+  .stat-card.purple { border-left-color: #6a1b9a; }
+  .stat-num { font-size: 32px; font-weight: 800; color: var(--primary); }
+  .stat-card.green .stat-num { color: var(--success); }
+  .stat-card.orange .stat-num { color: var(--secondary); }
+  .stat-card.red .stat-num { color: var(--danger); }
+  .stat-card.purple .stat-num { color: #6a1b9a; }
+  .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; font-weight: 600; }
+
+  /* CHARTS GRID */
+  .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; margin-bottom: 20px; }
+  .chart-box { background: var(--card); border-radius: 10px; border: 1px solid var(--border); padding: 20px; }
+  .chart-box canvas { max-height: 260px; }
+
+  /* FORM */
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+  .form-group input, .form-group select, .form-group textarea {
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 9px 12px; font-size: 13px; color: var(--text);
+    background: #fff; transition: border-color 0.2s;
+    font-family: inherit;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    outline: none; border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(26,86,160,0.1);
+  }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+  .form-full { grid-column: 1 / -1; }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 18px; border-radius: 6px; font-size: 13px;
+    font-weight: 600; cursor: pointer; border: none;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: var(--primary-dark); }
+  .btn-success { background: var(--success); color: #fff; }
+  .btn-success:hover { background: #1b5e20; }
+  .btn-warning { background: var(--warning); color: #fff; }
+  .btn-warning:hover { background: #e65100; }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-danger:hover { background: #b71c1c; }
+  .btn-outline { background: #fff; color: var(--primary); border: 1px solid var(--primary); }
+  .btn-outline:hover { background: var(--accent); }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+
+  /* TABLE */
+  .table-toolbar {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 14px; flex-wrap: wrap;
+  }
+  .search-box {
+    flex: 1; min-width: 200px; max-width: 320px;
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 8px 12px; font-size: 13px;
+    font-family: inherit;
+  }
+  .search-box:focus { outline: none; border-color: var(--primary); }
+  .filter-select {
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 8px 12px; font-size: 13px;
+    font-family: inherit; background: #fff; color: var(--text);
+  }
+  .table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    background: var(--primary); color: #fff;
+    padding: 11px 14px; text-align: left;
+    font-weight: 600; white-space: nowrap;
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--accent); }
+  tbody td { padding: 10px 14px; vertical-align: middle; }
+  .badge {
+    display: inline-block; padding: 3px 9px; border-radius: 12px;
+    font-size: 11px; font-weight: 700; white-space: nowrap;
+  }
+  .badge-staf { background: #e3f2fd; color: #1565c0; }
+  .badge-pelajar { background: #f3e5f5; color: #6a1b9a; }
+  .badge-emas { background: #fff8e1; color: #f57f17; }
+  .badge-perak { background: #eceff1; color: #455a64; }
+  .badge-gangsa { background: #fbe9e7; color: #bf360c; }
+  .badge-harapan { background: #e8f5e9; color: #2e7d32; }
+  .badge-penyertaan { background: #e0f7fa; color: #006064; }
+  .badge-none { background: #f5f5f5; color: #757575; }
+  .badge-disahkan { background: #e8f5e9; color: #2e7d32; }
+  .badge-semak { background: #fff3e0; color: #e65100; }
+  .badge-draf { background: #f5f5f5; color: #757575; }
+
+  /* PAGINATION */
+  .pagination { display: flex; align-items: center; gap: 6px; margin-top: 14px; justify-content: flex-end; }
+  .page-btn {
+    border: 1px solid var(--border); background: #fff;
+    padding: 6px 12px; border-radius: 5px; cursor: pointer;
+    font-size: 13px; font-family: inherit; color: var(--text);
+  }
+  .page-btn:hover, .page-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .page-info { font-size: 12px; color: var(--muted); }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5); z-index: 1000;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #fff; border-radius: 12px; width: 90%; max-width: 700px;
+    max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    padding: 28px;
+  }
+  .modal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px; padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-header h2 { font-size: 17px; color: var(--primary); }
+  .modal-close {
+    background: none; border: none; font-size: 22px;
+    cursor: pointer; color: var(--muted); line-height: 1;
+  }
+  .modal-close:hover { color: var(--danger); }
+
+  /* TOAST */
+  #toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--success); color: #fff;
+    padding: 12px 20px; border-radius: 8px;
+    font-size: 13px; font-weight: 600;
+    display: none; z-index: 9999;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 40px; color: var(--muted); }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+
+  /* REPORT */
+  .report-section { margin-bottom: 20px; }
+  .report-row { display: flex; gap: 12px; margin-bottom: 10px; align-items: center; flex-wrap: wrap; }
+  .info-box { background: var(--accent); border-radius: 8px; padding: 12px 16px; font-size: 13px; color: var(--primary); border-left: 4px solid var(--primary); }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    header { padding: 0 14px; }
+    main { padding: 14px; }
+    .header-title h1 { font-size: 15px; }
+    nav button { padding: 12px 12px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo-badge">PSMZA</div>
+    <div class="header-title">
+      <h1>&#9881; i-Inovasi PSMZA</h1>
+      <p>Sistem Pengurusan Inovasi Digital &bull; Tahun 2026</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div style="font-weight:700;">Politeknik Sultan Mizan Zainal Abidin</div>
+    <div>Penyelaras Inovasi | <span id="hdr-date"></span></div>
+  </div>
+</header>
+
+<nav>
+  <button class="active" onclick="switchTab('dashboard')">&#128202; Dashboard</button>
+  <button onclick="switchTab('borang')">&#128221; Borang Inovasi</button>
+  <button onclick="switchTab('rekod')">&#128196; Rekod &amp; Pengurusan</button>
+  <button onclick="switchTab('laporan')">&#128190; Laporan</button>
+</nav>
+
+<main>
+  <!-- ═══════════════════ TAB: DASHBOARD ═══════════════════ -->
+  <div id="tab-dashboard" class="tab-content active">
+    <div class="stat-grid" id="stat-grid"></div>
+    <div class="charts-grid">
+      <div class="chart-box">
+        <div class="card-title">&#128202; Inovasi Mengikut Jabatan</div>
+        <canvas id="chartJabatan"></canvas>
+      </div>
+      <div class="chart-box">
+        <div class="card-title">&#127775; Inovasi Mengikut Kategori</div>
+        <canvas id="chartKategori"></canvas>
+      </div>
+      <div class="chart-box">
+        <div class="card-title">&#127942; Pencapaian Pertandingan</div>
+        <canvas id="chartPencapaian"></canvas>
+      </div>
+      <div class="chart-box">
+        <div class="card-title">&#128100; Staf vs Pelajar</div>
+        <canvas id="chartJenis"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">&#128203; 5 Inovasi Terkini Ditambah</div>
+      <div class="table-wrap">
+        <table id="tbl-terkini">
+          <thead><tr>
+            <th>#</th><th>Tajuk Inovasi</th><th>Nama Pencipta</th><th>Jabatan</th><th>Kategori</th><th>Pencapaian</th><th>Status</th>
+          </tr></thead>
+          <tbody id="tbody-terkini"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ TAB: BORANG ═══════════════════ -->
+  <div id="tab-borang" class="tab-content">
+    <div class="card">
+      <div class="card-title">&#128221; Borang Pendaftaran Inovasi Baharu</div>
+      <form id="form-inovasi" onsubmit="submitBorang(event)">
+        <div class="form-grid">
+          <div class="form-group form-full">
+            <label>Tajuk Inovasi *</label>
+            <input type="text" id="f-tajuk" placeholder="Masukkan tajuk inovasi..." required>
+          </div>
+          <div class="form-group">
+            <label>Nama Pencipta / Ketua Projek *</label>
+            <input type="text" id="f-nama" placeholder="Nama penuh..." required>
+          </div>
+          <div class="form-group">
+            <label>No. Kad Pengenalan / No. Matrik</label>
+            <input type="text" id="f-id" placeholder="cth: 900101-XX-XXXX / A23B0001">
+          </div>
+          <div class="form-group">
+            <label>Jenis Pencipta *</label>
+            <select id="f-jenis" required>
+              <option value="">-- Pilih --</option>
+              <option>Staf</option>
+              <option>Pelajar</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Jabatan / Program *</label>
+            <select id="f-jabatan" required>
+              <option value="">-- Pilih --</option>
+              <option>Jabatan Kejuruteraan Mekanikal</option>
+              <option>Jabatan Kejuruteraan Elektrik</option>
+              <option>Jabatan Kejuruteraan Awam</option>
+              <option>Jabatan Teknologi Maklumat</option>
+              <option>Jabatan Perdagangan</option>
+              <option>Jabatan Hospitaliti</option>
+              <option>Jabatan Sains</option>
+              <option>Unit Hal Ehwal Pelajar</option>
+              <option>Lain-lain</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Kategori Inovasi *</label>
+            <select id="f-kategori" required>
+              <option value="">-- Pilih --</option>
+              <option>Inovasi Produk</option>
+              <option>Inovasi Proses</option>
+              <option>Inovasi Perkhidmatan</option>
+              <option>Inovasi Teknologi</option>
+              <option>Inovasi Sosial</option>
+              <option>Inovasi Kurikulum</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Nama Pertandingan / Program</label>
+            <input type="text" id="f-pertandingan" placeholder="cth: InnoEx 2026, CITREX...">
+          </div>
+          <div class="form-group">
+            <label>Peringkat Pertandingan</label>
+            <select id="f-peringkat">
+              <option value="">-- Pilih --</option>
+              <option>Dalaman</option>
+              <option>Negeri</option>
+              <option>Kebangsaan</option>
+              <option>Antarabangsa</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Pencapaian</label>
+            <select id="f-pencapaian">
+              <option value="Tiada">Tiada / Belum Penyertaan</option>
+              <option value="Penyertaan">Penyertaan Sahaja</option>
+              <option value="Gangsa">Gangsa</option>
+              <option value="Perak">Perak</option>
+              <option value="Emas">Emas</option>
+              <option value="Harapan">Anugerah Harapan</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Tarikh Inovasi / Penyertaan</label>
+            <input type="date" id="f-tarikh">
+          </div>
+          <div class="form-group">
+            <label>Status Rekod</label>
+            <select id="f-status">
+              <option value="Draf">Draf</option>
+              <option value="Semak Semula">Semak Semula</option>
+              <option value="Disahkan">Disahkan</option>
+            </select>
+          </div>
+          <div class="form-group form-full">
+            <label>Penerangan Ringkas Inovasi</label>
+            <textarea id="f-penerangan" placeholder="Huraikan secara ringkas tentang inovasi ini, objektif dan faedahnya..."></textarea>
+          </div>
+        </div>
+        <div class="btn-group">
+          <button type="submit" class="btn btn-primary">&#10003; Simpan Rekod</button>
+          <button type="button" class="btn btn-outline" onclick="resetBorang()">&#8635; Set Semula</button>
+        </div>
+      </form>
+      <input type="hidden" id="edit-id" value="">
+    </div>
+    <div class="info-box">
+      &#9432; Semua medan bertanda * adalah wajib diisi. Rekod akan disimpan sebagai <strong>Draf</strong> secara lalai sehingga disahkan oleh Penyelaras Inovasi.
+    </div>
+  </div>
+
+  <!-- ═══════════════════ TAB: REKOD ═══════════════════ -->
+  <div id="tab-rekod" class="tab-content">
+    <div class="card">
+      <div class="card-title">&#128196; Senarai Rekod Inovasi</div>
+      <div class="table-toolbar">
+        <input class="search-box" type="text" id="carian" placeholder="&#128269; Cari tajuk, nama, jabatan..." oninput="renderTable()">
+        <select class="filter-select" id="filter-jenis" onchange="renderTable()">
+          <option value="">Semua Jenis</option>
+          <option>Staf</option>
+          <option>Pelajar</option>
+        </select>
+        <select class="filter-select" id="filter-jabatan" onchange="renderTable()">
+          <option value="">Semua Jabatan</option>
+          <option>Jabatan Kejuruteraan Mekanikal</option>
+          <option>Jabatan Kejuruteraan Elektrik</option>
+          <option>Jabatan Kejuruteraan Awam</option>
+          <option>Jabatan Teknologi Maklumat</option>
+          <option>Jabatan Perdagangan</option>
+          <option>Jabatan Hospitaliti</option>
+          <option>Jabatan Sains</option>
+          <option>Unit Hal Ehwal Pelajar</option>
+        </select>
+        <select class="filter-select" id="filter-pencapaian" onchange="renderTable()">
+          <option value="">Semua Pencapaian</option>
+          <option>Emas</option>
+          <option>Perak</option>
+          <option>Gangsa</option>
+          <option>Harapan</option>
+          <option>Penyertaan</option>
+          <option>Tiada</option>
+        </select>
+        <select class="filter-select" id="filter-status" onchange="renderTable()">
+          <option value="">Semua Status</option>
+          <option>Disahkan</option>
+          <option>Semak Semula</option>
+          <option>Draf</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table id="tbl-rekod">
+          <thead><tr>
+            <th>#</th>
+            <th>Tajuk Inovasi</th>
+            <th>Nama Pencipta</th>
+            <th>Jenis</th>
+            <th>Jabatan</th>
+            <th>Kategori</th>
+            <th>Pertandingan</th>
+            <th>Pencapaian</th>
+            <th>Status</th>
+            <th>Tindakan</th>
+          </tr></thead>
+          <tbody id="tbody-rekod"></tbody>
+        </table>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;flex-wrap:wrap;gap:10px;">
+        <div class="page-info" id="page-info"></div>
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ TAB: LAPORAN ═══════════════════ -->
+  <div id="tab-laporan" class="tab-content">
+    <div class="card">
+      <div class="card-title">&#128190; Jana & Eksport Laporan</div>
+      <div class="report-section">
+        <div class="report-row">
+          <select class="filter-select" id="rpt-jabatan">
+            <option value="">Semua Jabatan</option>
+            <option>Jabatan Kejuruteraan Mekanikal</option>
+            <option>Jabatan Kejuruteraan Elektrik</option>
+            <option>Jabatan Kejuruteraan Awam</option>
+            <option>Jabatan Teknologi Maklumat</option>
+            <option>Jabatan Perdagangan</option>
+            <option>Jabatan Hospitaliti</option>
+            <option>Jabatan Sains</option>
+            <option>Unit Hal Ehwal Pelajar</option>
+          </select>
+          <select class="filter-select" id="rpt-jenis">
+            <option value="">Semua Jenis</option>
+            <option>Staf</option>
+            <option>Pelajar</option>
+          </select>
+          <select class="filter-select" id="rpt-status">
+            <option value="">Semua Status</option>
+            <option>Disahkan</option>
+            <option>Semak Semula</option>
+            <option>Draf</option>
+          </select>
+          <button class="btn btn-primary" onclick="janaLaporan()">&#128202; Jana Laporan</button>
+        </div>
+        <div class="report-row" style="margin-top:10px;">
+          <button class="btn btn-success" onclick="eksportCSV()">&#128190; Eksport CSV</button>
+          <button class="btn btn-warning" onclick="eksportHTML()">&#128196; Eksport HTML/Print</button>
+        </div>
+      </div>
+      <div id="laporan-ringkasan" style="margin-bottom:16px;"></div>
+      <div class="table-wrap">
+        <table id="tbl-laporan">
+          <thead><tr>
+            <th>Bil</th><th>Tajuk Inovasi</th><th>Nama Pencipta</th>
+            <th>Jenis</th><th>Jabatan</th><th>Kategori</th>
+            <th>Pertandingan</th><th>Peringkat</th><th>Pencapaian</th>
+            <th>Tarikh</th><th>Status</th>
+          </tr></thead>
+          <tbody id="tbody-laporan"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- MODAL LIHAT / EDIT -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">Maklumat Inovasi</h2>
+      <button class="modal-close" onclick="closeModal()">&#10005;</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// DATA CONTOH
+// ═══════════════════════════════════════════════════════════
+let data = [
+  { id:1, tajuk:"SmartHydro: Sistem Pengairan Automatik Berasaskan IoT", nama:"Ts. Mohd Hafizi bin Zakaria", idnum:"750312-11-5678", jenis:"Staf", jabatan:"Jabatan Kejuruteraan Elektrik", kategori:"Inovasi Teknologi", pertandingan:"InnoEx 2026", peringkat:"Kebangsaan", pencapaian:"Emas", tarikh:"2026-03-15", status:"Disahkan", penerangan:"Sistem pengairan ladang automatik menggunakan sensor kelembapan tanah dan kawalan melalui aplikasi mudah alih." },
+  { id:2, tajuk:"EduBot: Chatbot Pembelajaran Adaptif untuk Pelajar Politeknik", nama:"Dr. Nur Aisyah binti Hassan", idnum:"820515-03-4321", jenis:"Staf", jabatan:"Jabatan Teknologi Maklumat", kategori:"Inovasi Teknologi", pertandingan:"CITREX 2026", peringkat:"Antarabangsa", pencapaian:"Perak", tarikh:"2026-04-10", status:"Disahkan", penerangan:"Sistem pembelajaran pintar berasaskan AI yang menyesuaikan kandungan dengan gaya pembelajaran setiap pelajar." },
+  { id:3, tajuk:"GreenBrick: Bata Mesra Alam daripada Sisa Industri", nama:"Mohd Amirul bin Ismail", idnum:"A23B0001", jenis:"Pelajar", jabatan:"Jabatan Kejuruteraan Awam", kategori:"Inovasi Produk", pertandingan:"PECIPTA 2026", peringkat:"Kebangsaan", pencapaian:"Gangsa", tarikh:"2026-05-20", status:"Disahkan", penerangan:"Menghasilkan bata berkualiti tinggi menggunakan sisa pembakaran arang batu yang mengurangkan pembaziran." },
+  { id:4, tajuk:"CoolVest Pro: Jaket Penyejuk Mesra Alam untuk Pekerja Lapangan", nama:"Razali bin Ahmad", idnum:"830907-12-9876", jenis:"Staf", jabatan:"Jabatan Kejuruteraan Mekanikal", kategori:"Inovasi Produk", pertandingan:"MTE 2026", peringkat:"Antarabangsa", pencapaian:"Emas", tarikh:"2026-02-18", status:"Disahkan", penerangan:"Jaket penyejuk menggunakan bahan berubah fasa (PCM) untuk mengekalkan suhu badan pekerja di persekitaran panas." },
+  { id:5, tajuk:"DigiRekod: Sistem Pengurusan Rekod Pelajar Digital", nama:"Siti Nabilah binti Roslan", idnum:"A23B0045", jenis:"Pelajar", jabatan:"Jabatan Perdagangan", kategori:"Inovasi Proses", pertandingan:"ICONTECH 2026", peringkat:"Negeri", pencapaian:"Emas", tarikh:"2026-06-01", status:"Disahkan", penerangan:"Sistem digitalisasi rekod pelajar yang mengurangkan penggunaan kertas dan mempercepatkan proses semakan." },
+  { id:6, tajuk:"AquaPure: Penapis Air Mesra Alam menggunakan Arang Biochar", nama:"Tengku Farhan bin Tengku Aziz", idnum:"A23C0102", jenis:"Pelajar", jabatan:"Jabatan Sains", kategori:"Inovasi Produk", pertandingan:"BioEx Kebangsaan 2026", peringkat:"Kebangsaan", pencapaian:"Harapan", tarikh:"2026-03-28", status:"Semak Semula", penerangan:"Menggunakan arang biochar daripada sisa pertanian sebagai bahan penapis air yang efektif dan murah." },
+  { id:7, tajuk:"SmartParking PSMZA: Sistem Tempahan Parkir Berasaskan QR Code", nama:"Norzaini binti Othman", idnum:"791120-05-2211", jenis:"Staf", jabatan:"Unit Hal Ehwal Pelajar", kategori:"Inovasi Perkhidmatan", pertandingan:"InnoEx 2026", peringkat:"Kebangsaan", pencapaian:"Perak", tarikh:"2026-03-15", status:"Disahkan", penerangan:"Sistem tempahan lot parkir menggunakan imbasan QR Code yang mengintegrasikan papan pemuka pengurusan ruang parkir." },
+  { id:8, tajuk:"FlexiMould: Acuan Cetakan 3D Boleh Suai untuk Kerja Amali", nama:"Zulkifli bin Mat Nor", idnum:"870604-08-3345", jenis:"Staf", jabatan:"Jabatan Kejuruteraan Mekanikal", kategori:"Inovasi Proses", pertandingan:"ITEX 2026", peringkat:"Antarabangsa", pencapaian:"Emas", tarikh:"2026-04-25", status:"Disahkan", penerangan:"Acuan cetakan 3D modular yang boleh disesuaikan untuk pelbagai eksperimen kerja amali di bengkel." },
+  { id:9, tajuk:"i-Hospitality: Modul Latihan Hospitaliti Interaktif", nama:"Nurul Hana binti Che Hassan", idnum:"A24A0201", jenis:"Pelajar", jabatan:"Jabatan Hospitaliti", kategori:"Inovasi Kurikulum", pertandingan:"EduFair 2026", peringkat:"Negeri", pencapaian:"Penyertaan", tarikh:"2026-07-10", status:"Semak Semula", penerangan:"Modul latihan interaktif menggunakan teknologi augmented reality untuk simulasi khidmat hospitaliti." },
+  { id:10, tajuk:"WeldTrack: Pemantauan Kualiti Kimpalan secara Real-time", nama:"Azhar bin Sulaiman", idnum:"801215-09-7654", jenis:"Staf", jabatan:"Jabatan Kejuruteraan Mekanikal", kategori:"Inovasi Teknologi", pertandingan:"Tiada", peringkat:"", pencapaian:"Tiada", tarikh:"2026-08-05", status:"Draf", penerangan:"Sistem pengesanan kualiti kimpalan menggunakan pemprosesan imej dan analisis data masa nyata." },
+  { id:11, tajuk:"EcoSoap: Sabun Organik daripada Sisa Minyak Masak", nama:"Alia Huda binti Kamaruzaman", idnum:"A23D0312", jenis:"Pelajar", jabatan:"Jabatan Sains", kategori:"Inovasi Produk", pertandingan:"CITREX 2026", peringkat:"Antarabangsa", pencapaian:"Perak", tarikh:"2026-04-10", status:"Disahkan", penerangan:"Menghasilkan sabun organik berkualiti menggunakan sisa minyak masak yang dikitar semula dengan teknik saponifikasi." },
+  { id:12, tajuk:"SmartBoard: Papan Putih Digital Interaktif Kos Rendah", nama:"Khairul Nizam bin Ramli", idnum:"860321-06-8890", jenis:"Staf", jabatan:"Jabatan Teknologi Maklumat", kategori:"Inovasi Teknologi", pertandingan:"InnoEx 2026", peringkat:"Kebangsaan", pencapaian:"Gangsa", tarikh:"2026-03-15", status:"Disahkan", penerangan:"Papan putih interaktif menggunakan pen infra merah dan kamera web biasa sebagai alternatif kos rendah." },
+  { id:13, tajuk:"LogiStore: Sistem Inventori Stor Berasaskan RFID", nama:"Farid bin Abdullah", idnum:"A24B0089", jenis:"Pelajar", jabatan:"Jabatan Perdagangan", kategori:"Inovasi Proses", pertandingan:"ICONTECH 2026", peringkat:"Negeri", pencapaian:"Harapan", tarikh:"2026-06-01", status:"Semak Semula", penerangan:"Sistem pengurusan inventori menggunakan teknologi RFID untuk pengesanan stok secara automatik." },
+  { id:14, tajuk:"SolarDry: Pengering Solar Padi bagi Komuniti Nelayan", nama:"Mohd Radzi bin Yusof", idnum:"770818-11-4432", jenis:"Staf", jabatan:"Jabatan Kejuruteraan Elektrik", kategori:"Inovasi Sosial", pertandingan:"PECIPTA 2026", peringkat:"Kebangsaan", pencapaian:"Emas", tarikh:"2026-05-20", status:"Disahkan", penerangan:"Alat pengering solar mudah alih berkapasiti tinggi untuk membantu komuniti nelayan mengeringkan hasil tangkapan." },
+  { id:15, tajuk:"CivTrack: Aplikasi Pemantauan Projek Kerja Awam Pelajar", nama:"Hidayah binti Zainuddin", idnum:"A24C0178", jenis:"Pelajar", jabatan:"Jabatan Kejuruteraan Awam", kategori:"Inovasi Proses", pertandingan:"Tiada", peringkat:"", pencapaian:"Tiada", tarikh:"2026-09-01", status:"Draf", penerangan:"Aplikasi mudah alih untuk pelajar memantau kemajuan projek kerja amali di tapak bina secara digital." },
+];
+let nextId = 16;
+let currentPage = 1;
+const rowsPerPage = 8;
+let laporanData = [...data];
+
+// ═══════════════════════════════════════════════════════════
+// UTILITI
+// ═══════════════════════════════════════════════════════════
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = type === 'success' ? 'var(--success)' : type === 'danger' ? 'var(--danger)' : 'var(--warning)';
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 3000);
+}
+
+function badgePencapaian(p) {
+  const map = { Emas:'badge-emas', Perak:'badge-perak', Gangsa:'badge-gangsa', Harapan:'badge-harapan', Penyertaan:'badge-penyertaan', Tiada:'badge-none' };
+  return `<span class="badge ${map[p]||'badge-none'}">${p}</span>`;
+}
+function badgeJenis(j) { return `<span class="badge ${j==='Staf'?'badge-staf':'badge-pelajar'}">${j}</span>`; }
+function badgeStatus(s) {
+  const map = { Disahkan:'badge-disahkan', 'Semak Semula':'badge-semak', Draf:'badge-draf' };
+  return `<span class="badge ${map[s]||'badge-draf'}">${s}</span>`;
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'rekod') { currentPage = 1; renderTable(); }
+  if (name === 'laporan') janaLaporan();
+}
+
+// ═══════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════
+let chartInstances = {};
+function renderDashboard() {
+  const total = data.length;
+  const staf = data.filter(d => d.jenis === 'Staf').length;
+  const pelajar = data.filter(d => d.jenis === 'Pelajar').length;
+  const emas = data.filter(d => d.pencapaian === 'Emas').length;
+  const disahkan = data.filter(d => d.status === 'Disahkan').length;
+
+  document.getElementById('stat-grid').innerHTML = `
+    <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">&#128196; Jumlah Inovasi</div></div>
+    <div class="stat-card green"><div class="stat-num">${staf}</div><div class="stat-label">&#128100; Inovasi Staf</div></div>
+    <div class="stat-card purple"><div class="stat-num">${pelajar}</div><div class="stat-label">&#127891; Inovasi Pelajar</div></div>
+    <div class="stat-card orange"><div class="stat-num">${emas}</div><div class="stat-label">&#127942; Pencapaian Emas</div></div>
+    <div class="stat-card red"><div class="stat-num">${disahkan}</div><div class="stat-label">&#10003; Rekod Disahkan</div></div>
+  `;
+
+  // Chart: Jabatan
+  const jabList = [...new Set(data.map(d => d.jabatan))];
+  const jabShort = jabList.map(j => j.replace('Jabatan ','Jbt. ').replace('Unit ','Unit '));
+  const jabCount = jabList.map(j => data.filter(d => d.jabatan === j).length);
+  renderChart('chartJabatan', 'bar', jabShort, [{label:'Bil. Inovasi', data:jabCount, backgroundColor:'#1a56a0'}]);
+
+  // Chart: Kategori
+  const katList = [...new Set(data.map(d => d.kategori))];
+  const katCount = katList.map(k => data.filter(d => d.kategori === k).length);
+  const colors = ['#1a56a0','#e8941a','#2e7d32','#c62828','#6a1b9a','#00838f'];
+  renderChart('chartKategori', 'pie', katList, [{data:katCount, backgroundColor:colors}]);
+
+  // Chart: Pencapaian
+  const penList = ['Emas','Perak','Gangsa','Harapan','Penyertaan','Tiada'];
+  const penCount = penList.map(p => data.filter(d => d.pencapaian === p).length);
+  const penColors = ['#f9a825','#90a4ae','#bf360c','#2e7d32','#0097a7','#9e9e9e'];
+  renderChart('chartPencapaian', 'bar', penList, [{label:'Bil. Inovasi', data:penCount, backgroundColor:penColors}]);
+
+  // Chart: Staf vs Pelajar
+  renderChart('chartJenis', 'doughnut', ['Staf','Pelajar'], [{data:[staf,pelajar], backgroundColor:['#1a56a0','#6a1b9a']}]);
+
+  // Terkini
+  const terkini = [...data].slice(-5).reverse();
+  document.getElementById('tbody-terkini').innerHTML = terkini.map((d,i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td style="max-width:220px;"><b>${d.tajuk}</b></td>
+      <td>${d.nama}</td>
+      <td><span style="font-size:11px">${d.jabatan.replace('Jabatan ','Jbt. ')}</span></td>
+      <td>${d.kategori}</td>
+      <td>${badgePencapaian(d.pencapaian)}</td>
+      <td>${badgeStatus(d.status)}</td>
+    </tr>`).join('');
+}
+
+function renderChart(id, type, labels, datasets) {
+  if (chartInstances[id]) { chartInstances[id].destroy(); }
+  const ctx = document.getElementById(id).getContext('2d');
+  chartInstances[id] = new Chart(ctx, {
+    type,
+    data: { labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { position: type==='bar'?'top':'right', labels:{ font:{size:11} } } },
+      scales: type === 'bar' ? { y: { beginAtZero:true, ticks:{stepSize:1} } } : {}
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// BORANG
+// ═══════════════════════════════════════════════════════════
+function submitBorang(e) {
+  e.preventDefault();
+  const editId = document.getElementById('edit-id').value;
+  const rec = {
+    id: editId ? parseInt(editId) : nextId++,
+    tajuk: document.getElementById('f-tajuk').value.trim(),
+    nama: document.getElementById('f-nama').value.trim(),
+    idnum: document.getElementById('f-id').value.trim(),
+    jenis: document.getElementById('f-jenis').value,
+    jabatan: document.getElementById('f-jabatan').value,
+    kategori: document.getElementById('f-kategori').value,
+    pertandingan: document.getElementById('f-pertandingan').value.trim() || 'Tiada',
+    peringkat: document.getElementById('f-peringkat').value,
+    pencapaian: document.getElementById('f-pencapaian').value,
+    tarikh: document.getElementById('f-tarikh').value,
+    status: document.getElementById('f-status').value,
+    penerangan: document.getElementById('f-penerangan').value.trim(),
+  };
+  if (editId) {
+    const idx = data.findIndex(d => d.id === rec.id);
+    if (idx > -1) data[idx] = rec;
+    showToast('Rekod berjaya dikemas kini!');
+  } else {
+    data.push(rec);
+    showToast('Rekod berjaya disimpan!');
+  }
+  resetBorang();
+  switchTabDirect('rekod');
+}
+
+function resetBorang() {
+  document.getElementById('form-inovasi').reset();
+  document.getElementById('edit-id').value = '';
+  document.querySelector('#tab-borang .card-title').textContent = '📝 Borang Pendaftaran Inovasi Baharu';
+}
+
+function switchTabDirect(name) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('nav button')[{ dashboard:0, borang:1, rekod:2, laporan:3 }[name]].classList.add('active');
+  if (name === 'rekod') { currentPage = 1; renderTable(); }
+  if (name === 'dashboard') renderDashboard();
+}
+
+// ═══════════════════════════════════════════════════════════
+// REKOD & JADUAL
+// ═══════════════════════════════════════════════════════════
+function getFiltered() {
+  const carian = document.getElementById('carian').value.toLowerCase();
+  const fj = document.getElementById('filter-jenis').value;
+  const fjb = document.getElementById('filter-jabatan').value;
+  const fp = document.getElementById('filter-pencapaian').value;
+  const fs = document.getElementById('filter-status').value;
+  return data.filter(d =>
+    (!carian || d.tajuk.toLowerCase().includes(carian) || d.nama.toLowerCase().includes(carian) || d.jabatan.toLowerCase().includes(carian)) &&
+    (!fj || d.jenis === fj) &&
+    (!fjb || d.jabatan === fjb) &&
+    (!fp || d.pencapaian === fp) &&
+    (!fs || d.status === fs)
+  );
+}
+
+function renderTable() {
+  const filtered = getFiltered();
+  const total = filtered.length;
+  const pages = Math.ceil(total / rowsPerPage);
+  if (currentPage > pages) currentPage = 1;
+  const start = (currentPage - 1) * rowsPerPage;
+  const rows = filtered.slice(start, start + rowsPerPage);
+
+  const tbody = document.getElementById('tbody-rekod');
+  if (rows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><div class="icon">🔍</div><div>Tiada rekod dijumpai</div></div></td></tr>`;
+  } else {
+    tbody.innerHTML = rows.map((d, i) => `
+      <tr>
+        <td>${start + i + 1}</td>
+        <td style="max-width:200px;font-weight:600;font-size:12px">${d.tajuk}</td>
+        <td style="font-size:12px">${d.nama}</td>
+        <td>${badgeJenis(d.jenis)}</td>
+        <td style="font-size:11px">${d.jabatan.replace('Jabatan ','Jbt. ')}</td>
+        <td style="font-size:11px">${d.kategori}</td>
+        <td style="font-size:11px">${d.pertandingan}</td>
+        <td>${badgePencapaian(d.pencapaian)}</td>
+        <td>${badgeStatus(d.status)}</td>
+        <td>
+          <button class="btn btn-outline btn-sm" onclick="lihatRekod(${d.id})">&#128065;</button>
+          <button class="btn btn-warning btn-sm" onclick="editRekod(${d.id})">&#9998;</button>
+          <button class="btn btn-success btn-sm" onclick="sahRekod(${d.id})">&#10003;</button>
+          <button class="btn btn-danger btn-sm" onclick="padamRekod(${d.id})">&#128465;</button>
+        </td>
+      </tr>`).join('');
+  }
+
+  document.getElementById('page-info').textContent = total === 0 ? 'Tiada rekod' : `Menunjukkan ${start+1}–${Math.min(start+rowsPerPage, total)} daripada ${total} rekod`;
+
+  let pgHtml = '';
+  if (pages > 1) {
+    pgHtml += `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>&#8249;</button>`;
+    for (let p = 1; p <= pages; p++) pgHtml += `<button class="page-btn ${p===currentPage?'active':''}" onclick="goPage(${p})">${p}</button>`;
+    pgHtml += `<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===pages?'disabled':''}>&#8250;</button>`;
+  }
+  document.getElementById('pagination').innerHTML = pgHtml;
+}
+
+function goPage(p) {
+  const filtered = getFiltered();
+  const pages = Math.ceil(filtered.length / rowsPerPage);
+  if (p < 1 || p > pages) return;
+  currentPage = p;
+  renderTable();
+}
+
+function lihatRekod(id) {
+  const d = data.find(r => r.id === id);
+  if (!d) return;
+  document.getElementById('modal-title').textContent = '📋 Maklumat Inovasi';
+  document.getElementById('modal-body').innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      ${[
+        ['Tajuk Inovasi', `<b>${d.tajuk}</b>`],
+        ['Nama Pencipta', d.nama],
+        ['No. KP / Matrik', d.idnum || '-'],
+        ['Jenis', badgeJenis(d.jenis)],
+        ['Jabatan / Program', d.jabatan],
+        ['Kategori', d.kategori],
+        ['Pertandingan', d.pertandingan],
+        ['Peringkat', d.peringkat || '-'],
+        ['Pencapaian', badgePencapaian(d.pencapaian)],
+        ['Tarikh', d.tarikh || '-'],
+        ['Status', badgeStatus(d.status)],
+        ['Penerangan', d.penerangan || '-'],
+      ].map(([k,v]) => `<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:9px 12px;font-weight:700;color:var(--muted);width:40%;background:#f7f8fa">${k}</td>
+        <td style="padding:9px 12px">${v}</td>
+      </tr>`).join('')}
+    </table>
+    <div class="btn-group" style="margin-top:16px">
+      <button class="btn btn-warning" onclick="closeModal();editRekod(${d.id})">&#9998; Edit Rekod</button>
+      <button class="btn btn-outline" onclick="closeModal()">Tutup</button>
+    </div>`;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function editRekod(id) {
+  const d = data.find(r => r.id === id);
+  if (!d) return;
+  switchTabDirect('borang');
+  document.getElementById('edit-id').value = d.id;
+  document.getElementById('f-tajuk').value = d.tajuk;
+  document.getElementById('f-nama').value = d.nama;
+  document.getElementById('f-id').value = d.idnum || '';
+  document.getElementById('f-jenis').value = d.jenis;
+  document.getElementById('f-jabatan').value = d.jabatan;
+  document.getElementById('f-kategori').value = d.kategori;
+  document.getElementById('f-pertandingan').value = d.pertandingan === 'Tiada' ? '' : d.pertandingan;
+  document.getElementById('f-peringkat').value = d.peringkat || '';
+  document.getElementById('f-pencapaian').value = d.pencapaian;
+  document.getElementById('f-tarikh').value = d.tarikh || '';
+  document.getElementById('f-status').value = d.status;
+  document.getElementById('f-penerangan').value = d.penerangan || '';
+  document.querySelector('#tab-borang .card-title').textContent = '✏️ Kemas Kini Rekod Inovasi';
+  window.scrollTo(0, 0);
+}
+
+function sahRekod(id) {
+  const d = data.find(r => r.id === id);
+  if (!d) return;
+  if (d.status === 'Disahkan') { showToast('Rekod sudah disahkan.', 'warning'); return; }
+  d.status = 'Disahkan';
+  renderTable();
+  showToast(`Rekod "${d.tajuk.substring(0,40)}..." berjaya disahkan!`);
+}
+
+function padamRekod(id) {
+  const d = data.find(r => r.id === id);
+  if (!d) return;
+  openConfirm(`Padam rekod "${d.tajuk.substring(0,50)}..."?`, () => {
+    data = data.filter(r => r.id !== id);
+    renderTable();
+    showToast('Rekod berjaya dipadam!', 'danger');
+  });
+}
+
+function openConfirm(msg, onOk) {
+  document.getElementById('modal-title').textContent = '⚠️ Pengesahan';
+  document.getElementById('modal-body').innerHTML = `
+    <p style="margin-bottom:20px;font-size:14px">${msg}</p>
+    <div class="btn-group">
+      <button class="btn btn-danger" onclick="closeModal();(${onOk.toString()})()">Ya, Padam</button>
+      <button class="btn btn-outline" onclick="closeModal()">Batal</button>
+    </div>`;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+
+// ═══════════════════════════════════════════════════════════
+// LAPORAN
+// ═══════════════════════════════════════════════════════════
+function janaLaporan() {
+  const fj = document.getElementById('rpt-jabatan').value;
+  const jenis = document.getElementById('rpt-jenis').value;
+  const st = document.getElementById('rpt-status').value;
+  laporanData = data.filter(d =>
+    (!fj || d.jabatan === fj) &&
+    (!jenis || d.jenis === jenis) &&
+    (!st || d.status === st)
+  );
+
+  const total = laporanData.length;
+  const staf = laporanData.filter(d => d.jenis === 'Staf').length;
+  const pelajar = laporanData.filter(d => d.jenis === 'Pelajar').length;
+  const emas = laporanData.filter(d => d.pencapaian === 'Emas').length;
+
+  document.getElementById('laporan-ringkasan').innerHTML = `
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <div class="stat-card" style="flex:1;min-width:120px"><div class="stat-num">${total}</div><div class="stat-label">Jumlah</div></div>
+      <div class="stat-card green" style="flex:1;min-width:120px"><div class="stat-num">${staf}</div><div class="stat-label">Staf</div></div>
+      <div class="stat-card purple" style="flex:1;min-width:120px"><div class="stat-num" style="color:#6a1b9a">${pelajar}</div><div class="stat-label">Pelajar</div></div>
+      <div class="stat-card orange" style="flex:1;min-width:120px"><div class="stat-num">${emas}</div><div class="stat-label">Emas</div></div>
+    </div>`;
+
+  document.getElementById('tbody-laporan').innerHTML = laporanData.length === 0
+    ? `<tr><td colspan="11"><div class="empty-state"><div class="icon">📋</div><div>Tiada rekod dijumpai</div></div></td></tr>`
+    : laporanData.map((d,i) => `
+      <tr>
+        <td>${i+1}</td>
+        <td style="font-size:12px;max-width:200px"><b>${d.tajuk}</b></td>
+        <td style="font-size:12px">${d.nama}</td>
+        <td>${badgeJenis(d.jenis)}</td>
+        <td style="font-size:11px">${d.jabatan.replace('Jabatan ','Jbt. ')}</td>
+        <td style="font-size:11px">${d.kategori}</td>
+        <td style="font-size:11px">${d.pertandingan}</td>
+        <td style="font-size:11px">${d.peringkat||'-'}</td>
+        <td>${badgePencapaian(d.pencapaian)}</td>
+        <td style="font-size:11px">${d.tarikh||'-'}</td>
+        <td>${badgeStatus(d.status)}</td>
+      </tr>`).join('');
+}
+
+function eksportCSV() {
+  if (!laporanData.length) { showToast('Tiada data untuk dieksport.', 'warning'); return; }
+  const headers = ['Bil','Tajuk Inovasi','Nama Pencipta','No.KP/Matrik','Jenis','Jabatan','Kategori','Pertandingan','Peringkat','Pencapaian','Tarikh','Status','Penerangan'];
+  const rows = laporanData.map((d,i) => [
+    i+1, `"${d.tajuk}"`, `"${d.nama}"`, d.idnum||'', d.jenis,
+    `"${d.jabatan}"`, d.kategori, `"${d.pertandingan}"`, d.peringkat||'',
+    d.pencapaian, d.tarikh||'', d.status, `"${(d.penerangan||'').replace(/"/g,'""')}"`
+  ]);
+  const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `Laporan_iInovasi_PSMZA_2026.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast('Fail CSV berjaya dimuat turun!');
+}
+
+function eksportHTML() {
+  const w = window.open('', '_blank');
+  const rows = laporanData.map((d,i) => `<tr>
+    <td>${i+1}</td><td>${d.tajuk}</td><td>${d.nama}</td><td>${d.jenis}</td>
+    <td>${d.jabatan}</td><td>${d.kategori}</td><td>${d.pertandingan}</td>
+    <td>${d.peringkat||'-'}</td><td>${d.pencapaian}</td><td>${d.tarikh||'-'}</td><td>${d.status}</td>
+  </tr>`).join('');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Laporan i-Inovasi PSMZA 2026</title>
+  <style>body{font-family:Arial,sans-serif;padding:20px;font-size:12px}
+  h2{color:#1a56a0}table{width:100%;border-collapse:collapse}
+  th{background:#1a56a0;color:#fff;padding:8px}td{border:1px solid #ddd;padding:6px}
+  tr:nth-child(even){background:#f0f4f8}
+  .footer{margin-top:20px;color:#888;font-size:11px;text-align:center}
+  @media print{button{display:none}}</style></head><body>
+  <h2>Laporan i-Inovasi PSMZA 2026</h2>
+  <p>Tarikh Cetak: ${new Date().toLocaleDateString('ms-MY')} | Jumlah Rekod: ${laporanData.length}</p>
+  <button onclick="window.print()" style="padding:8px 16px;background:#1a56a0;color:#fff;border:none;border-radius:4px;cursor:pointer;margin-bottom:12px">🖨️ Cetak</button>
+  <table><thead><tr>
+    <th>Bil</th><th>Tajuk Inovasi</th><th>Nama Pencipta</th><th>Jenis</th>
+    <th>Jabatan</th><th>Kategori</th><th>Pertandingan</th><th>Peringkat</th>
+    <th>Pencapaian</th><th>Tarikh</th><th>Status</th>
+  </tr></thead><tbody>${rows}</tbody></table>
+  <div class="footer">Politeknik Sultan Mizan Zainal Abidin &bull; Sistem i-Inovasi 2026</div>
+  </body></html>`);
+  w.document.close();
+  showToast('Laporan HTML dibuka dalam tab baharu!');
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+document.getElementById('hdr-date').textContent = new Date().toLocaleDateString('ms-MY', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+renderDashboard();
+janaLaporan();
+</script>
+</body>
+</html>
